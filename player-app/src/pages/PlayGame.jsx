@@ -9,13 +9,13 @@ import { usePlayerSocket } from '@/hooks/usePlayerSocket.js';
 
 export default function PlayGame() {
   const navigate = useNavigate();
-  const { part, feedback, finished, submitCode, notifyTimeUp } = usePlayerSocket();
+  const { gameCode, feedback, finished, submitCode, notifyTimeUp } = usePlayerSocket();
   const [code, setCode] = useState('');
   const [extraSeconds, setExtraSeconds] = useState(0);
 
   useEffect(() => {
-    if (part) setCode(part.buggyCode);
-  }, [part]);
+    if (gameCode) setCode(gameCode.buggyCode);
+  }, [gameCode]);
 
   useEffect(() => {
     if (feedback?.type === 'wrong') {
@@ -30,25 +30,25 @@ export default function PlayGame() {
     if (finished) navigate('/result');
   }, [finished, navigate]);
 
-  if (!part) return null;
+  if (!gameCode) return null;
 
   return (
     <div className="min-h-screen p-4 space-y-4 bg-secondary/30">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Corrija o erro de lógica</h1>
-        <Badge variant="outline">Parte #{part.partIndex + 1}</Badge>
+        <h1 className="text-xl font-bold">Encontre e corrija os erros de lógica</h1>
+        <Badge variant="outline">{gameCode.bugCount} erro(s) no código</Badge>
       </div>
 
-      <Timer timeLimit={part.timeLimit} extraSeconds={extraSeconds} onTimeUp={notifyTimeUp} />
+      <Timer timeLimit={gameCode.timeLimit} extraSeconds={extraSeconds} onTimeUp={notifyTimeUp} />
 
       <Card>
         <CardHeader>
-          <CardTitle>Seu trecho de código</CardTitle>
+          <CardTitle>Código com bugs</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <Editor
-            height="360px"
-            defaultLanguage={part.language}
+            height="400px"
+            defaultLanguage={gameCode.language}
             value={code}
             onChange={(v) => setCode(v ?? '')}
             theme="vs-dark"

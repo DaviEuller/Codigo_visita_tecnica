@@ -1,6 +1,5 @@
 import { getRoom, updateRoom } from '../store/roomsStore.js';
-import { splitCodeIntoParts } from '../game/splitCode.js';
-import { injectRandomBug } from '../game/injectBugs.js';
+import { injectBugs } from '../game/injectBugs.js';
 
 export function registerAdminHandlers(io, socket) {
   socket.on('admin:joinRoom', ({ roomCode, adminToken }) => {
@@ -19,32 +18,29 @@ export function registerAdminHandlers(io, socket) {
     const room = getRoom(roomCode);
     if (!room || room.status !== 'waiting') return;
     if (room.participants.length === 0) return;
+    if (!room.sourceCode) return;
 
-    const n = room.participants.length;
-    const parts = splitCodeIntoParts(room.sourceCode, n);
+    // gera UM código com N erros (padrão 3), igual para todos os participantes
+    const { buggyCode, expectedFix, bugsApplied } = injectBugs(room.sourceCode, room.bugCount || 3);
 
-    room.parts = parts.map((original, index) => {
-      const { buggyCode, expectedFix, mutation } = injectRandomBug(original);
-      return { index, originalCode: original, buggyCode, expectedFix, mutation, assignedTo: null };
-    });
+    room.buggyCode = buggyCode;
+    room.expectedFix = expectedFix;
+    room.bugsApplied = bugsApplied;
+    room.status = 'running';
 
-    room.participants.forEach((participant, i) => {
-      participant.partIndex = i;
+    room.participants.forEach((participant) => {
       participant.status = 'solving';
       participant.timeLeft = room.timeLimit;
-      room.parts[i].assignedTo = participant.id;
 
-      io.to(participant.socketId).emit('game:yourPart', {
-        partIndex: i,
-        buggyCode: room.parts[i].buggyCode,
+      io.to(participant.socketId).emit('game:code', {
+        buggyCode: room.buggyCode,
         language: room.language,
         timeLimit: room.timeLimit,
+        bugCount: room.bugCount || 3,
       });
     });
 
-    room.status = 'running';
     updateRoom(room.code, room);
-
     io.to(`admin:${room.code}`).emit('game:started', { room: sanitizeRoom(room) });
   });
 
@@ -80,6 +76,6 @@ export function buildLeaderboard(room) {
 }
 
 function sanitizeRoom(room) {
-  const { adminToken, ...safe } = room;
+  const { adminToken, expectedFix, ...safe } = room;
   return safe;
 }

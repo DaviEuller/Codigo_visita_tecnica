@@ -6,7 +6,7 @@ const PlayerSocketContext = createContext(null);
 export function PlayerSocketProvider({ children }) {
   const [joined, setJoined] = useState(false);
   const [joinError, setJoinError] = useState(null);
-  const [part, setPart] = useState(null);
+  const [gameCode, setGameCode] = useState(null); // { buggyCode, language, timeLimit, bugCount }
   const [feedback, setFeedback] = useState(null);
   const [finished, setFinished] = useState(null);
 
@@ -15,7 +15,7 @@ export function PlayerSocketProvider({ children }) {
 
     const onJoined = () => setJoined(true);
     const onJoinError = ({ message }) => setJoinError(message);
-    const onYourPart = (payload) => setPart(payload);
+    const onGameCode = (payload) => setGameCode(payload);
     const onWrong = (payload) => setFeedback({ type: 'wrong', ...payload });
     const onCorrect = (payload) => setFeedback({ type: 'correct', ...payload });
     const onTimeUp = (payload) => setFeedback({ type: 'timeUp', ...payload });
@@ -24,7 +24,7 @@ export function PlayerSocketProvider({ children }) {
 
     socket.on('player:joined', onJoined);
     socket.on('player:joinError', onJoinError);
-    socket.on('game:yourPart', onYourPart);
+    socket.on('game:code', onGameCode);
     socket.on('submit:wrong', onWrong);
     socket.on('submit:correct', onCorrect);
     socket.on('game:timeUp', onTimeUp);
@@ -39,7 +39,7 @@ export function PlayerSocketProvider({ children }) {
     return () => {
       socket.off('player:joined', onJoined);
       socket.off('player:joinError', onJoinError);
-      socket.off('game:yourPart', onYourPart);
+      socket.off('game:code', onGameCode);
       socket.off('submit:wrong', onWrong);
       socket.off('submit:correct', onCorrect);
       socket.off('game:timeUp', onTimeUp);
@@ -62,7 +62,7 @@ export function PlayerSocketProvider({ children }) {
     socket.emit('player:timeUp');
   }, []);
 
-  const value = { joined, joinError, part, feedback, finished, join, submitCode, notifyTimeUp };
+  const value = { joined, joinError, gameCode, feedback, finished, join, submitCode, notifyTimeUp };
 
   return <PlayerSocketContext.Provider value={value}>{children}</PlayerSocketContext.Provider>;
 }

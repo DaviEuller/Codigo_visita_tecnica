@@ -1,4 +1,4 @@
-export function newRoom({ code, adminToken, maxParticipants = null, autoSplit = true, timeLimit = 300 }) {
+export function newRoom({ code, adminToken, maxParticipants = null, timeLimit = 300, bugCount = 3 }) {
   return {
     code,
     adminToken,
@@ -7,9 +7,11 @@ export function newRoom({ code, adminToken, maxParticipants = null, autoSplit = 
     sourceCode: '',
     language: 'javascript',
     maxParticipants,
-    autoSplit,
     timeLimit,
-    parts: [],
+    bugCount, // quantidade de erros de lógica injetados no código
+    buggyCode: '',   // código com os erros, igual para todos os participantes
+    expectedFix: '', // código correto original, usado na validação
+    bugsApplied: [],
     participants: [],
     finishOrder: [],
   };
@@ -20,7 +22,6 @@ export function newParticipant({ id, socketId, name }) {
     id,
     socketId,
     name,
-    partIndex: null,
     status: 'waiting', // waiting | solving | correct | failed_time
     score: 0,
     attempts: 0,

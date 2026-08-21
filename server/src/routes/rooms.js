@@ -9,11 +9,11 @@ const router = Router();
 
 // POST /api/rooms  -> cria sala
 router.post('/', (req, res) => {
-  const { maxParticipants = null, autoSplit = true, timeLimit = 300 } = req.body || {};
+  const { maxParticipants = null, timeLimit = 300, bugCount = 3 } = req.body || {};
   const code = genCode();
   const adminToken = nanoid();
 
-  const room = newRoom({ code, adminToken, maxParticipants, autoSplit, timeLimit });
+  const room = newRoom({ code, adminToken, maxParticipants, timeLimit, bugCount });
   createRoom(room);
 
   res.status(201).json({ roomCode: code, adminToken });
@@ -56,7 +56,7 @@ router.post('/:code/errors', (req, res) => {
 
 // PATCH /api/rooms/:code/settings
 router.patch('/:code/settings', (req, res) => {
-  const { maxParticipants, timeLimit, autoSplit, adminToken } = req.body || {};
+  const { maxParticipants, timeLimit, bugCount, adminToken } = req.body || {};
   const room = getRoom(req.params.code.toUpperCase());
   if (!room) return res.status(404).json({ message: 'Sala não encontrada' });
   if (room.adminToken !== adminToken) return res.status(403).json({ message: 'Token inválido' });
@@ -64,7 +64,7 @@ router.patch('/:code/settings', (req, res) => {
   const patch = {};
   if (maxParticipants !== undefined) patch.maxParticipants = maxParticipants;
   if (timeLimit !== undefined) patch.timeLimit = timeLimit;
-  if (autoSplit !== undefined) patch.autoSplit = autoSplit;
+  if (bugCount !== undefined) patch.bugCount = bugCount;
 
   updateRoom(room.code, patch);
   res.json({ ok: true });

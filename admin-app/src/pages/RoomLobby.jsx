@@ -55,7 +55,7 @@ export default function RoomLobby() {
         <CardContent>
           <textarea
             className="w-full h-72 font-mono text-sm p-3 rounded-md border border-input bg-background"
-            placeholder="Cole aqui o código que será dividido entre os participantes..."
+            placeholder="Cole aqui o código correto. Ao iniciar, o sistema vai injetar os erros de lógica e enviar o mesmo código, com bugs, para todos os participantes."
             value={sourceCode}
             onChange={(e) => setSourceCode(e.target.value)}
           />

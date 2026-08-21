@@ -38,14 +38,12 @@ export function registerPlayerHandlers(io, socket) {
     const participant = room.participants.find((p) => p.id === participantId);
     if (!participant || participant.status !== 'solving') return;
 
-    const part = room.parts[participant.partIndex];
-    const isCorrect = normalize(code) === normalize(part.expectedFix);
+    const isCorrect = normalize(code) === normalize(room.expectedFix);
 
     if (isCorrect) {
       const rank = room.finishOrder.length + 1;
       room.finishOrder.push(participantId);
 
-      // total de participantes que ainda vão terminar/participar, para cálculo de bônus
       const totalPlayers = room.participants.length;
       const { bonus, totalGained } = applyCorrectAnswer(participant, rank, totalPlayers);
 

@@ -10,6 +10,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [maxParticipants, setMaxParticipants] = useState('');
   const [timeLimit, setTimeLimit] = useState(300);
+  const [bugCount, setBugCount] = useState(3);
   const [loading, setLoading] = useState(false);
 
   async function handleCreateRoom() {
@@ -20,8 +21,8 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           maxParticipants: maxParticipants ? Number(maxParticipants) : null,
-          autoSplit: true,
           timeLimit: Number(timeLimit),
+          bugCount: Number(bugCount),
         }),
       });
       const data = await res.json();
@@ -53,6 +54,10 @@ export default function Home() {
           <div className="space-y-2">
             <Label>Tempo por participante (segundos)</Label>
             <Input type="number" value={timeLimit} onChange={(e) => setTimeLimit(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Quantidade de erros no código</Label>
+            <Input type="number" min={1} max={10} value={bugCount} onChange={(e) => setBugCount(e.target.value)} />
           </div>
         </CardContent>
         <CardFooter>

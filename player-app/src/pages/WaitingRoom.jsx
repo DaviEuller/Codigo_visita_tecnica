@@ -5,11 +5,11 @@ import { usePlayerSocket } from '@/hooks/usePlayerSocket.js';
 
 export default function WaitingRoom() {
   const navigate = useNavigate();
-  const { part } = usePlayerSocket();
+  const { gameCode } = usePlayerSocket();
 
   useEffect(() => {
-    if (part) navigate('/play');
-  }, [part, navigate]);
+    if (gameCode) navigate('/play');
+  }, [gameCode, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary/30 p-4">
