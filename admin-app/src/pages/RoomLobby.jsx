@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAdminSocket } from '@/context/AdminSocketContext.jsx';
 import { SERVER_URL } from '@/lib/socket';
 
@@ -10,7 +12,7 @@ export default function RoomLobby() {
   const { code } = useParams();
   const navigate = useNavigate();
   const adminToken = sessionStorage.getItem(`adminToken:${code}`);
-  const { participants, joinError, joinRoom, startGame: startGameCtx } = useAdminSocket();
+  const { participants, joinError, joinRoom, startGame: startGameCtx, room } = useAdminSocket();
 
   useEffect(() => {
     if (code && adminToken) joinRoom(code, adminToken);
@@ -20,6 +22,26 @@ export default function RoomLobby() {
 
   const [sourceCode, setSourceCode] = useState('');
   const [saving, setSaving] = useState(false);
+  const [bugCount, setBugCount] = useState(3);
+  const [savingBugCount, setSavingBugCount] = useState(false);
+
+  // assim que a sala carrega (ou é atualizada), sincroniza o valor atual
+  useEffect(() => {
+    if (room?.bugCount !== undefined) setBugCount(room.bugCount);
+  }, [room?.bugCount]);
+
+  async function handleSaveBugCount() {
+    setSavingBugCount(true);
+    try {
+      await fetch(`${SERVER_URL}/api/rooms/${code}/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bugCount: Number(bugCount), adminToken }),
+      });
+    } finally {
+      setSavingBugCount(false);
+    }
+  }
 
   async function handleSaveSource() {
     setSaving(true);
@@ -65,6 +87,28 @@ export default function RoomLobby() {
             {saving ? 'Salvando...' : 'Salvar código'}
           </Button>
         </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Quantidade de erros</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Label>Erros de lógica injetados no código (1 a 10)</Label>
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              min={1}
+              max={10}
+              value={bugCount}
+              onChange={(e) => setBugCount(e.target.value)}
+              className="max-w-[120px]"
+            />
+            <Button variant="outline" onClick={handleSaveBugCount} disabled={savingBugCount}>
+              {savingBugCount ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </div>
+        </CardContent>
       </Card>
 
       <Card>

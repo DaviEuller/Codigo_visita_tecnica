@@ -22,7 +22,7 @@ export default function Home() {
         body: JSON.stringify({
           maxParticipants: maxParticipants ? Number(maxParticipants) : null,
           timeLimit: Number(timeLimit),
-          bugCount: Number(bugCount),
+          bugCount: Math.min(10, Math.max(1, Number(bugCount) || 3)),
         }),
       });
       const data = await res.json();

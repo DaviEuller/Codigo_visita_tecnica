@@ -5,6 +5,15 @@ import { newRoom } from '../game/Room.js';
 
 const genCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', 6);
 
+// Limita a quantidade de erros entre 1 e 10 (a lista de mutações disponíveis
+// tem um limite de tipos diferentes; pedir mais do que isso simplesmente
+// aplica o máximo possível, sem quebrar nada).
+function clampBugCount(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 3;
+  return Math.min(10, Math.max(1, Math.round(n)));
+}
+
 const router = Router();
 
 // POST /api/rooms  -> cria sala
@@ -13,7 +22,13 @@ router.post('/', (req, res) => {
   const code = genCode();
   const adminToken = nanoid();
 
-  const room = newRoom({ code, adminToken, maxParticipants, timeLimit, bugCount });
+  const room = newRoom({
+    code,
+    adminToken,
+    maxParticipants,
+    timeLimit,
+    bugCount: clampBugCount(bugCount),
+  });
   createRoom(room);
 
   res.status(201).json({ roomCode: code, adminToken });
@@ -64,10 +79,10 @@ router.patch('/:code/settings', (req, res) => {
   const patch = {};
   if (maxParticipants !== undefined) patch.maxParticipants = maxParticipants;
   if (timeLimit !== undefined) patch.timeLimit = timeLimit;
-  if (bugCount !== undefined) patch.bugCount = bugCount;
+  if (bugCount !== undefined) patch.bugCount = clampBugCount(bugCount);
 
   updateRoom(room.code, patch);
-  res.json({ ok: true });
+  res.json({ ok: true, bugCount: patch.bugCount });
 });
 
 // GET /api/rooms/:code/leaderboard
