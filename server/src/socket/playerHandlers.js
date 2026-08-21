@@ -44,8 +44,9 @@ export function registerPlayerHandlers(io, socket) {
       const rank = room.finishOrder.length + 1;
       room.finishOrder.push(participantId);
 
-      const totalPlayers = room.participants.length;
-      const { bonus, totalGained } = applyCorrectAnswer(participant, rank, totalPlayers);
+      const elapsedSeconds = (Date.now() - (participant.startedAt || Date.now())) / 1000;
+      const timeLeftSeconds = Math.max(0, room.timeLimit - elapsedSeconds);
+      const { bonus, totalGained } = applyCorrectAnswer(participant, timeLeftSeconds, room.timeLimit);
 
       updateRoom(room.code, room);
 
@@ -58,15 +59,13 @@ export function registerPlayerHandlers(io, socket) {
 
       checkGameEnd(io, room);
     } else {
-      const { penalty, extraTime } = applyWrongAnswer(participant);
+      const { penalty } = applyWrongAnswer(participant);
       updateRoom(room.code, room);
 
       socket.emit('submit:wrong', {
         message: 'Ainda tem erro no código. Reveja a lógica.',
         penalty,
-        extraTime,
         newScore: participant.score,
-        newTimeLeft: participant.timeLeft,
       });
       io.to(`admin:${room.code}`).emit('game:participantUpdate', {
         participantId,

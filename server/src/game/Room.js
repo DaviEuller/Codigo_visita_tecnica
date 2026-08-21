@@ -26,6 +26,7 @@ export function newParticipant({ id, socketId, name }) {
     score: 0,
     attempts: 0,
     timeLeft: null,
+    startedAt: null, // timestamp de quando começou a resolver (usado p/ calcular bônus por tempo)
     finishedAt: null,
   };
 }

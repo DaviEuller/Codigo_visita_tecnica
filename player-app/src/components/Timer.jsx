@@ -1,15 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { Progress } from '@/components/ui/progress';
 
-export default function Timer({ timeLimit, extraSeconds = 0, onTimeUp }) {
+export default function Timer({ timeLimit, onTimeUp }) {
   const [secondsLeft, setSecondsLeft] = useState(timeLimit);
   const totalRef = useRef(timeLimit);
-
-  useEffect(() => {
-    setSecondsLeft((prev) => prev + extraSeconds);
-    totalRef.current += extraSeconds;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [extraSeconds]);
 
   useEffect(() => {
     if (secondsLeft <= 0) {

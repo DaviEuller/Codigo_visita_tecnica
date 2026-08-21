@@ -11,16 +11,12 @@ export default function PlayGame() {
   const navigate = useNavigate();
   const { gameCode, feedback, finished, submitCode, notifyTimeUp } = usePlayerSocket();
   const [code, setCode] = useState('');
-  const [extraSeconds, setExtraSeconds] = useState(0);
 
   useEffect(() => {
     if (gameCode) setCode(gameCode.buggyCode);
   }, [gameCode]);
 
   useEffect(() => {
-    if (feedback?.type === 'wrong') {
-      setExtraSeconds((s) => s + (feedback.extraTime || 0));
-    }
     if (feedback?.type === 'correct' || feedback?.type === 'timeUp') {
       navigate('/result');
     }
@@ -39,7 +35,7 @@ export default function PlayGame() {
         <Badge variant="outline">{gameCode.bugCount} erro(s) no código</Badge>
       </div>
 
-      <Timer timeLimit={gameCode.timeLimit} extraSeconds={extraSeconds} onTimeUp={notifyTimeUp} />
+      <Timer timeLimit={gameCode.timeLimit} onTimeUp={notifyTimeUp} />
 
       <Card>
         <CardHeader>
@@ -58,7 +54,7 @@ export default function PlayGame() {
         <CardFooter className="flex-col items-stretch gap-2">
           {feedback?.type === 'wrong' && (
             <p className="text-sm text-destructive">
-              {feedback.message} (-{feedback.penalty} pts, +{feedback.extraTime}s)
+              {feedback.message} (-{feedback.penalty} pts)
             </p>
           )}
           <Button className="w-full" onClick={() => submitCode(code)}>

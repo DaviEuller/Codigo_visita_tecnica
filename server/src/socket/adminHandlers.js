@@ -31,6 +31,7 @@ export function registerAdminHandlers(io, socket) {
     room.participants.forEach((participant) => {
       participant.status = 'solving';
       participant.timeLeft = room.timeLimit;
+      participant.startedAt = Date.now();
 
       io.to(participant.socketId).emit('game:code', {
         buggyCode: room.buggyCode,
