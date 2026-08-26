@@ -74,8 +74,7 @@ export default function FinalResult() {
           <CardDescription className="text-base">
             {feedback?.type === 'correct' && (
               <>
-                Você acertou! Posição <span className="font-bold text-foreground">{feedback.rank}º</span> —{' '}
-                <span className="font-bold text-success">+{feedback.totalGained} pts</span>
+                Você acertou! Posição <span className="font-bold text-foreground">{feedback.rank}º</span> —{' '} Numero da chave é 081 
               </>
             )}
             {feedback?.type === 'timeUp' && (
