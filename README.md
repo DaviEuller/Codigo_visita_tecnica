@@ -1,0 +1,80 @@
+# CodeGame — Jogo de Correção de Bugs em Tempo Real
+
+Projeto para apresentação de curso de T.I: **todos os participantes recebem o
+mesmo código-fonte**, com **3 erros de lógica** simples injetados automaticamente.
+É uma corrida: quem corrigir os 3 erros primeiro leva mais pontos. Pontuação por
+acerto + bônus de posição, penalidade por tentativa errada.
+
+## Estrutura
+
+```
+codegame/
+├── server/          # Node.js + Express + Socket.io (fonte da verdade do jogo)
+├── admin-app/        # React + shadcn/ui — painel do administrador
+└── player-app/       # React + shadcn/ui — app do participante
+```
+
+## Como rodar
+
+### 1. Server
+```bash
+cd server
+cp .env.example .env
+npm install
+npm run dev        # http://localhost:4000
+```
+
+### 2. Admin App
+```bash
+cd admin-app
+cp .env.example .env
+npm install
+npm run dev         # normalmente http://localhost:5173
+```
+
+### 3. Player App
+```bash
+cd player-app
+cp .env.example .env
+npm install
+npm run dev -- --port 5174   # rode em porta diferente do admin
+```
+
+## shadcn/ui
+
+Os componentes em `src/components/ui` (button, card, input, label, badge,
+progress) já estão escritos manualmente seguindo o padrão do shadcn/ui.
+Se quiser usar a CLI oficial para adicionar mais componentes (dialog, table,
+tabs, toast, etc.), rode dentro de `admin-app` ou `player-app`:
+
+```bash
+npx shadcn@latest add dialog table tabs toast
+```
+
+O `components.json` já está configurado com os aliases `@/components`,
+`@/lib/utils` e `@/components/ui`.
+
+## Fluxo do jogo
+
+1. **Admin** cria a sala (`POST /api/rooms`) → recebe `roomCode` + `adminToken`.
+2. Admin cola o código-fonte e salva (`POST /api/rooms/:code/source`).
+3. Participantes entram via socket `player:join` com o `roomCode`.
+4. Admin clica em **Iniciar** (`admin:startGame`) → servidor injeta N erros de
+   lógica simples (padrão 3) no código-fonte (`injectBugs.js`), gerando UMA
+   única versão "com bug" enviada igualmente a todos.
+5. Cada participante recebe `game:code` com o código com bugs e o timer individual.
+6. Ao enviar (`player:submitCode`):
+   - **Correto** → `submit:correct` com pontos base (100) + bônus de posição
+     (100 no 1º lugar, decrescendo até 10 no último).
+   - **Errado** → `submit:wrong` com -40 pts e +30s de tempo extra.
+7. Quando todos terminam (acerto ou tempo esgotado), `game:finished` envia o
+   leaderboard final para admin e participantes.
+
+## Próximos passos sugeridos
+
+- Adicionar tela de "Configurar erros manualmente" no admin (upload de trechos
+  + erro específico por participante).
+- Persistir salas em Redis se for rodar em mais de uma instância do server.
+- Adicionar tela de projeção (telão) com o ranking ao vivo em fonte grande.
+- Trocar comparação de string por validação via AST/testes automatizados se
+  quiser folga contra pequenas variações de formatação do participante.
