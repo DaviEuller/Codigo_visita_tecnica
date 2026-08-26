@@ -61,6 +61,19 @@ export default function FinalResult() {
           <CardDescription className="text-base">
             {feedback?.type === 'correct' && (
               <>
+                Você acertou! Posição <span className="font-bold text-foreground">{feedback.rank}º</span> —{' '} Numero da chave é 081
+                <span className="font-bold text-success">+{feedback.totalGained} pts</span>
+              </>
+            )}
+            {feedback?.type === 'timeUp' && (
+              <>Tempo esgotado. Pontuação final: <span className="font-bold text-foreground">{feedback.finalScore} pts</span></>
+            )}  
+            {!feedback && 'Aguardando o fim da partida...'}
+          </CardDescription>
+          
+          <CardDescription className="text-base">
+            {feedback?.type === 'correct' && (
+              <>
                 Você acertou! Posição <span className="font-bold text-foreground">{feedback.rank}º</span> —{' '}
                 <span className="font-bold text-success">+{feedback.totalGained} pts</span>
               </>
@@ -70,6 +83,8 @@ export default function FinalResult() {
             )}
             {!feedback && 'Aguardando o fim da partida...'}
           </CardDescription>
+
+          
         </CardHeader>
         {finished && (
           <CardContent className="space-y-2">
